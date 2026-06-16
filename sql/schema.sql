@@ -1,9 +1,9 @@
--- H2 Morning Watch — Neon DB 스키마
+-- CAMS Morning Watch — Neon DB 스키마
 -- Neon SQL Editor에서 1회 실행
 
 CREATE TABLE prices (
   date    date NOT NULL,
-  metric  text NOT NULL,            -- 'usdkrw' | 'wti'
+  metric  text NOT NULL,            -- 'hyundai' | 'kia' | 'usdkrw' | 'wti'
   value   numeric(10,2) NOT NULL,
   PRIMARY KEY (date, metric)
 );

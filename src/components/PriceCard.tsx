@@ -5,12 +5,13 @@ interface Props {
   label: string;
   unit: string;
   series: PricePoint[]; // 날짜 오름차순
+  decimals?: number; // 표시 소수 자릿수 (주가는 0, 환율·유가는 2)
 }
 
-const fmt = (v: number) =>
-  v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = (v: number, d: number) =>
+  v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-export default function PriceCard({ label, unit, series }: Props) {
+export default function PriceCard({ label, unit, series, decimals = 2 }: Props) {
   const latest = series.at(-1);
   const prev = series.at(-2);
 
@@ -45,10 +46,10 @@ export default function PriceCard({ label, unit, series }: Props) {
       </div>
       <p className="tnum mt-3 font-mono text-3xl font-semibold leading-none xl:text-4xl">
         <span className="mr-1 text-lg text-muted">{unit}</span>
-        {fmt(latest.value)}
+        {fmt(latest.value, decimals)}
       </p>
       <p className={`tnum mt-3 font-mono text-sm ${tone}`}>
-        {arrow} {fmt(Math.abs(delta))} ({pct >= 0 ? '+' : ''}
+        {arrow} {fmt(Math.abs(delta), decimals)} ({pct >= 0 ? '+' : ''}
         {pct.toFixed(2)}%)
       </p>
       <p className="tnum mt-1 font-mono text-xs text-muted">

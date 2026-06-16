@@ -1,4 +1,4 @@
-export type Metric = 'usdkrw' | 'jpykrw' | 'wti' | 'natgas';
+export type Metric = 'hyundai' | 'kia' | 'usdkrw' | 'wti';
 
 export interface PricePoint {
   date: string; // YYYY-MM-DD

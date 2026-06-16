@@ -24,10 +24,10 @@ const UA = {
 };
 
 const SYMBOLS = [
+  { yahoo: '005380.KS', metric: 'hyundai', scale: 1 }, // 현대차
+  { yahoo: '000270.KS', metric: 'kia', scale: 1 }, // 기아
   { yahoo: 'KRW=X', metric: 'usdkrw', scale: 1 },
-  { yahoo: 'JPYKRW=X', metric: 'jpykrw', scale: 100 }, // 100엔 기준
-  { yahoo: 'CL=F', metric: 'wti', scale: 1 },
-  { yahoo: 'NG=F', metric: 'natgas', scale: 1 },
+  { yahoo: 'CL=F', metric: 'wti', scale: 1 }, // PP 원가 선행 프록시
 ];
 
 for (const { yahoo, metric, scale } of SYMBOLS) {

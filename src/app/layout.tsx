@@ -15,8 +15,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "H2 Morning Watch",
-  description: "수소 압력용기 원가 변수 데일리 모닝 브리핑",
+  title: "CAMS Morning Watch",
+  description: "현대차 수요·환율·범퍼 원자재(PP) 선행지표 데일리 모니터링",
   robots: { index: false, follow: false },
 };
 

@@ -35,10 +35,10 @@ export async function GET(req: NextRequest) {
 
   // 1~2. 시세 4종 (직렬, 소스별 실패 격리)
   const priceSources: { metric: Metric; get: () => Promise<number> }[] = [
+    { metric: 'hyundai', get: () => fetchYahooPrice('005380.KS') }, // 현대차
+    { metric: 'kia', get: () => fetchYahooPrice('000270.KS') }, // 기아
     { metric: 'usdkrw', get: () => fetchKrwRate('USD') },
-    { metric: 'jpykrw', get: async () => (await fetchKrwRate('JPY')) * 100 }, // 100엔 기준
-    { metric: 'wti', get: () => fetchYahooPrice('CL=F') },
-    { metric: 'natgas', get: () => fetchYahooPrice('NG=F') },
+    { metric: 'wti', get: () => fetchYahooPrice('CL=F') }, // PP 원가 선행 프록시
   ];
   for (const { metric, get } of priceSources) {
     try {
@@ -53,16 +53,17 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 3. 뉴스 (키워드 직렬 수집 → 제목 중복 제거 → 단일 INSERT)
+  // 3. 뉴스 (항목별 직렬 수집 → 제목 중복 제거 → 단일 INSERT)
+  //    keyword 컬럼에는 검색 질의(query)가 아니라 탭에 보일 항목명(label)을 저장
   const fetched: (RssItem & { keyword: string })[] = [];
-  for (const keyword of NEWS_KEYWORDS) {
+  for (const { label, query } of NEWS_KEYWORDS) {
     try {
-      for (const item of await fetchNewsForKeyword(keyword)) {
-        fetched.push({ ...item, keyword });
+      for (const item of await fetchNewsForKeyword(query)) {
+        fetched.push({ ...item, keyword: label });
       }
-      results[`news:${keyword}`] = 'ok';
+      results[`news:${label}`] = 'ok';
     } catch (e) {
-      results[`news:${keyword}`] = `fail: ${errMsg(e)}`;
+      results[`news:${label}`] = `fail: ${errMsg(e)}`;
     }
   }
   if (fetched.length > 0) {
@@ -114,10 +115,10 @@ export async function GET(req: NextRequest) {
   // 5. AI 브리핑 (적재 완료된 당일 데이터 기준, 1일 1회 생성·멱등)
   try {
     const PRICE_LABELS: Record<Metric, { label: string; unit: string }> = {
+      hyundai: { label: '현대차 주가', unit: '₩' },
+      kia: { label: '기아 주가', unit: '₩' },
       usdkrw: { label: 'USD/KRW 환율', unit: '₩' },
-      jpykrw: { label: 'JPY/KRW 환율(100엔)', unit: '₩' },
-      wti: { label: 'WTI 유가(배럴)', unit: '$' },
-      natgas: { label: '천연가스(MMBtu)', unit: '$' },
+      wti: { label: 'WTI 유가(배럴, PP원가 선행)', unit: '$' },
     };
     const priceRows = (await sql`
       SELECT metric, date::text AS date, value::float AS value

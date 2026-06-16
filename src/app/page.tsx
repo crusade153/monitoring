@@ -5,15 +5,15 @@ import PriceCard from "@/components/PriceCard";
 import { getLatestBriefing, getPriceSeries, getRecentNews } from "@/lib/queries";
 import { todayKst } from "@/lib/types";
 
-// 인증 쿠키 뒤의 페이지 — 페이지 캐시 대신 unstable_cache로 데이터만 캐시
+// 공개 대시보드 — 페이지 캐시 대신 unstable_cache로 데이터만 캐시
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [usdkrw, jpykrw, wti, natgas, news, briefing] = await Promise.all([
+  const [hyundai, kia, usdkrw, wti, news, briefing] = await Promise.all([
+    getPriceSeries("hyundai"),
+    getPriceSeries("kia"),
     getPriceSeries("usdkrw"),
-    getPriceSeries("jpykrw"),
     getPriceSeries("wti"),
-    getPriceSeries("natgas"),
     getRecentNews(),
     getLatestBriefing(),
   ]);
@@ -23,11 +23,14 @@ export default async function DashboardPage() {
       <header className="flex items-baseline justify-between">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-accent">
-            H2 MORNING WATCH
+            CAMS MORNING WATCH
           </p>
           <h1 className="mt-1 text-xl font-bold sm:text-2xl">
-            데일리 모닝 브리핑
+            대표님 데일리 모니터링
           </h1>
+          <p className="mt-1 text-xs text-muted">
+            현대차 수요 · 환율 · 범퍼 원자재(PP) 선행지표
+          </p>
         </div>
         <p className="tnum font-mono text-xs text-muted">{todayKst()}</p>
       </header>
@@ -37,26 +40,26 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <PriceCard label="현대차 주가" unit="₩" series={hyundai} decimals={0} />
+        <PriceCard label="기아 주가" unit="₩" series={kia} decimals={0} />
         <PriceCard label="USD/KRW 환율" unit="₩" series={usdkrw} />
-        <PriceCard label="JPY/KRW 환율 (100엔)" unit="₩" series={jpykrw} />
-        <PriceCard label="WTI 유가 (배럴)" unit="$" series={wti} />
-        <PriceCard label="천연가스 (MMBtu)" unit="$" series={natgas} />
+        <PriceCard label="WTI 유가 (PP원가 선행)" unit="$" series={wti} />
       </section>
 
       <section className="mt-4">
         <ChartPanel
           series={[
+            { key: "hyundai", label: "현대차", data: hyundai, color: "#4f8df9" },
+            { key: "kia", label: "기아", data: kia, color: "#c084fc" },
             { key: "usdkrw", label: "USD/KRW", data: usdkrw, color: "#e8b34b" },
-            { key: "jpykrw", label: "JPY/KRW", data: jpykrw, color: "#c084fc" },
-            { key: "wti", label: "WTI", data: wti, color: "#4f8df9" },
-            { key: "natgas", label: "천연가스", data: natgas, color: "#34d399" },
+            { key: "wti", label: "WTI 유가", data: wti, color: "#34d399" },
           ]}
         />
       </section>
 
       <section className="mt-4">
         <h2 className="mb-2 text-sm font-medium text-muted">
-          키워드 뉴스 · 최근 7일
+          현대차 관련 뉴스 · 항목별 · 최근 7일
         </h2>
         <NewsFeed items={news} />
       </section>

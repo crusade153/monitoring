@@ -9,12 +9,11 @@ interface Props {
 }
 
 export default function NewsFeed({ items }: Props) {
-  // 키워드 정의 순서대로 탭 구성 (정의에 없는 과거 키워드는 뒤에)
+  // 항목 정의 순서대로 탭 구성 (정의에 없는 과거 항목은 뒤에)
+  const labels = NEWS_KEYWORDS.map((k) => k.label);
   const keywords = [
-    ...NEWS_KEYWORDS.filter((k) => items.some((i) => i.keyword === k)),
-    ...[...new Set(items.map((i) => i.keyword))].filter(
-      (k) => !(NEWS_KEYWORDS as readonly string[]).includes(k)
-    ),
+    ...labels.filter((k) => items.some((i) => i.keyword === k)),
+    ...[...new Set(items.map((i) => i.keyword))].filter((k) => !labels.includes(k)),
   ];
   const [active, setActive] = useState<string | undefined>(keywords[0]);
 
