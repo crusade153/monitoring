@@ -3,6 +3,8 @@ import { todayKst } from '@/lib/types';
 
 interface Props {
   label: string;
+  signalLabel?: string;
+  helperText?: string;
   unit: string;
   series: PricePoint[]; // 날짜 오름차순
   decimals?: number; // 표시 소수 자릿수 (주가는 0, 환율·유가는 2)
@@ -11,14 +13,22 @@ interface Props {
 const fmt = (v: number, d: number) =>
   v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-export default function PriceCard({ label, unit, series, decimals = 2 }: Props) {
+export default function PriceCard({
+  label,
+  signalLabel,
+  helperText,
+  unit,
+  series,
+  decimals = 2,
+}: Props) {
   const latest = series.at(-1);
   const prev = series.at(-2);
 
   if (!latest) {
     return (
       <div className="rounded-lg border border-line bg-card p-6">
-        <p className="text-sm font-medium text-muted">{label}</p>
+        <p className="text-xs font-medium text-accent">{signalLabel ?? label}</p>
+        {signalLabel && <p className="mt-1 text-sm font-medium text-muted">{label}</p>}
         <p className="mt-4 text-sm text-muted">데이터 없음 — 백필 또는 첫 수집 대기</p>
       </div>
     );
@@ -37,7 +47,10 @@ export default function PriceCard({ label, unit, series, decimals = 2 }: Props) 
   return (
     <div className="rounded-lg border border-line bg-card p-6">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted">{label}</p>
+        <div>
+          <p className="text-xs font-medium text-accent">{signalLabel ?? label}</p>
+          {signalLabel && <p className="mt-1 text-sm font-medium text-muted">{label}</p>}
+        </div>
         {staleDays >= 2 && (
           <span className="rounded border border-up/40 px-2 py-0.5 text-xs text-up">
             수집 실패 · 마지막 {latest.date}
@@ -55,6 +68,7 @@ export default function PriceCard({ label, unit, series, decimals = 2 }: Props) 
       <p className="tnum mt-1 font-mono text-xs text-muted">
         전일 대비 · {latest.date}
       </p>
+      {helperText && <p className="mt-3 text-xs leading-relaxed text-muted">{helperText}</p>}
     </div>
   );
 }

@@ -1,7 +1,14 @@
 import BriefingCard from "@/components/BriefingCard";
 import ChartPanel from "@/components/ChartPanel";
+import ImpactSummary from "@/components/ImpactSummary";
 import NewsFeed from "@/components/NewsFeed";
 import PriceCard from "@/components/PriceCard";
+import {
+  buildBusinessSignals,
+  buildDashboardStatus,
+  getEvidenceNews,
+  metricSnapshot,
+} from "@/lib/dashboard-insights";
 import { getLatestBriefing, getPriceSeries, getRecentNews } from "@/lib/queries";
 import { todayKst } from "@/lib/types";
 
@@ -17,6 +24,15 @@ export default async function DashboardPage() {
     getRecentNews(),
     getLatestBriefing(),
   ]);
+  const snapshotMap = {
+    hyundai: metricSnapshot("hyundai", hyundai),
+    kia: metricSnapshot("kia", kia),
+    usdkrw: metricSnapshot("usdkrw", usdkrw),
+    wti: metricSnapshot("wti", wti),
+  };
+  const status = buildDashboardStatus(Object.values(snapshotMap), news, briefing);
+  const signals = buildBusinessSignals(snapshotMap, news);
+  const evidenceNews = getEvidenceNews(news);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
@@ -26,24 +42,52 @@ export default async function DashboardPage() {
             CAMS MORNING WATCH
           </p>
           <h1 className="mt-1 text-xl font-bold sm:text-2xl">
-            데일리 모니터링
+            경영 브리핑 대시보드
           </h1>
           <p className="mt-1 text-xs text-muted">
-            현대차 수요 · 환율 · 범퍼 원자재(PP) 선행지표
+            고객사 수요 · 원가 압력 · 환율 부담 · 통상 리스크
           </p>
         </div>
         <p className="tnum font-mono text-xs text-muted">{todayKst()}</p>
       </header>
 
+      <ImpactSummary signals={signals} status={status} />
+
       <section className="mt-6">
-        <BriefingCard briefing={briefing} />
+        <BriefingCard briefing={briefing} evidenceNews={evidenceNews} />
       </section>
 
       <section className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <PriceCard label="현대차 주가" unit="₩" series={hyundai} decimals={0} />
-        <PriceCard label="기아 주가" unit="₩" series={kia} decimals={0} />
-        <PriceCard label="USD/KRW 환율" unit="₩" series={usdkrw} />
-        <PriceCard label="WTI 유가 (PP원가 선행)" unit="$" series={wti} />
+        <PriceCard
+          signalLabel="수요 신호"
+          label="현대차 주가"
+          unit="₩"
+          series={hyundai}
+          decimals={0}
+          helperText="고객사 생산·판매 뉴스와 함께 범퍼 발주 방향을 봅니다."
+        />
+        <PriceCard
+          signalLabel="수요 신호"
+          label="기아 주가"
+          unit="₩"
+          series={kia}
+          decimals={0}
+          helperText="완성차 업황 보조 신호로 현대차 흐름과 같이 확인합니다."
+        />
+        <PriceCard
+          signalLabel="환율 부담"
+          label="USD/KRW"
+          unit="₩"
+          series={usdkrw}
+          helperText="원재료 수입 단가와 원화 결제 부담의 선행 신호입니다."
+        />
+        <PriceCard
+          signalLabel="원가 압력"
+          label="WTI 유가"
+          unit="$"
+          series={wti}
+          helperText="PP·납사 가격 흐름을 보기 위한 원가 선행 프록시입니다."
+        />
       </section>
 
       <section className="mt-4">
