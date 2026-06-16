@@ -105,9 +105,15 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 4. 90일 경과 뉴스 정리 (테이블 비대 방지)
+  // 4. 정리: 90일 경과 + 현재 항목에 없는 과거 키워드 뉴스 제거
+  //    (keywords.ts 항목을 바꾸면 옛 키워드 기사가 탭에 섞이지 않도록 자동 purge)
   try {
-    await sql`DELETE FROM news WHERE pub_date < CURRENT_DATE - 90`;
+    const activeLabels = NEWS_KEYWORDS.map((k) => k.label);
+    await sql`
+      DELETE FROM news
+      WHERE pub_date < CURRENT_DATE - 90
+         OR NOT (keyword = ANY(${activeLabels}))
+    `;
   } catch (e) {
     results.cleanup = `fail: ${errMsg(e)}`;
   }
