@@ -26,7 +26,7 @@ export default async function DashboardPage() {
             CAMS MORNING WATCH
           </p>
           <h1 className="mt-1 text-xl font-bold sm:text-2xl">
-            대표님 데일리 모니터링
+            데일리 모니터링
           </h1>
           <p className="mt-1 text-xs text-muted">
             현대차 수요 · 환율 · 범퍼 원자재(PP) 선행지표
